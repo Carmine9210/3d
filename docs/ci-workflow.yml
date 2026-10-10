@@ -1,0 +1,77 @@
+# Da aggiungere a mano su GitHub come .github/workflows/ci.yml (Add file → Create new file).
+# Non è nel repository perché l'app Netlify non ha il permesso di creare workflow GitHub.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    env:
+      # Valori fittizi: servono solo a far compilare l'app, nessuna chiamata reale.
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-anon-key-ci-anon-key-ci-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: ci-service-key-ci-service-key-ci-service
+      STRIPE_SECRET_KEY: sk_test_ci
+      STRIPE_WEBHOOK_SECRET: whsec_ci
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci || npm install
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+
+  database:
+    # Avvia Postgres di Supabase (Docker), applica migrazioni + seed e lancia il linter del database.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase db start
+      - run: supabase db lint --level warning --fail-on error
+
+  e2e:
+    # Richiede un progetto Supabase di TEST dedicato: aggiungi i secret nel repository.
+    if: ${{ vars.RUN_E2E == 'true' }}
+    runs-on: ubuntu-latest
+    needs: checks
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.TEST_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_ROLE_KEY }}
+      STRIPE_SECRET_KEY: ${{ secrets.TEST_STRIPE_SECRET_KEY }}
+      # Firma dei webhook simulati nei test E2E (nessuna chiamata reale a Stripe)
+      STRIPE_WEBHOOK_SECRET: whsec_e2e_local_secret
+      NEXT_PUBLIC_SITE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci || npm install
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - run: npm run seed:demo
+      - run: npm run check-rls
+      - run: npm start &
+      - run: npx wait-on http://localhost:3000/it --timeout 120000
+      - run: npm run e2e
+        env:
+          E2E_BASE_URL: http://localhost:3000
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report

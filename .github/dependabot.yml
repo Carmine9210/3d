@@ -1,0 +1,22 @@
+# Aggiornamenti automatici: le versioni sono bloccate (esatte) nel package.json,
+# quindi gli aggiornamenti arrivano solo come Pull Request da verificare con la CI.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      # Patch e minor raggruppati in una sola PR settimanale
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Le major (Next 16, Tailwind 4, Zod 4, Stripe SDK…) richiedono una migrazione: vanno fatte a mano.
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

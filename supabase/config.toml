@@ -1,0 +1,69 @@
+# Configurazione Supabase CLI (https://supabase.com/docs/guides/local-development/cli/config)
+# Locale:   npx supabase start           → stack completo su Docker, migrazioni + seed applicati
+# Remoto:   npx supabase link --project-ref <ref> && npx supabase db push --include-seed
+project_id = "3d-market"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+
+[realtime]
+enabled = true
+
+[studio]
+enabled = true
+port = 54323
+
+# Email di test in locale: http://localhost:54324
+[inbucket]
+enabled = true
+port = 54324
+
+[storage]
+enabled = true
+file_size_limit = "5MiB"
+
+[storage.buckets.product-images]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+
+[storage.buckets.store-assets]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+
+[auth]
+enabled = true
+# In produzione questi valori si impostano dalla dashboard (Authentication → URL Configuration):
+# Site URL = https://<tuo-sito>.netlify.app (o il tuo dominio)
+# Redirect URLs = https://<tuo-sito>.netlify.app/** e https://**--<tuo-sito>.netlify.app/** (deploy preview)
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/**", "http://localhost:8888/**"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = true
+minimum_password_length = 8
+
+[auth.rate_limit]
+email_sent = 10
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+# In locale le email si leggono su Inbucket; in produzione lasciare attivo.
+enable_confirmations = true
+secure_password_change = true
+max_frequency = "60s"
