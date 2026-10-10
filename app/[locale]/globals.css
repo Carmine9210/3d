@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-padding-top: 5rem;
+}
+
+body {
+  @apply bg-paper font-sans text-ink antialiased;
+}
+
+:focus-visible {
+  outline: 3px solid #F28C28;
+  outline-offset: 2px;
+}
+
+@layer components {
+  .field {
+    @apply w-full rounded-card border border-line bg-white px-3 py-2 text-base text-ink placeholder:text-ink-mute;
+  }
+  .label {
+    @apply mb-1 block text-sm font-medium text-ink-soft;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-card px-4 py-2.5 text-base font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-print text-ink hover:bg-print-dark hover:text-white;
+  }
+  .btn-dark {
+    @apply btn bg-ink text-white hover:bg-ink-soft;
+  }
+  .btn-ghost {
+    @apply btn border border-line bg-white text-ink hover:border-ink;
+  }
+  .btn-danger {
+    @apply btn border border-bad text-bad hover:bg-bad hover:text-white;
+  }
+  .card {
+    @apply rounded-card border border-line bg-paper-card;
+  }
+  .notice {
+    @apply rounded-card border border-line bg-white px-4 py-3 text-sm;
+  }
+  .notice-error {
+    @apply border-bad text-bad;
+  }
+  .notice-ok {
+    @apply border-ok text-ok;
+  }
+}
+
+/* Il momento memorabile: l'oggetto "si stampa" livello dopo livello, una sola volta al caricamento. */
+@keyframes layer-in {
+  from { opacity: 0; transform: scaleX(0.4); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+.layer-row {
+  transform-origin: center;
+  transform-box: fill-box;
+  opacity: 0;
+  animation: layer-in 380ms ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .layer-row {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+@layer components {
+  .badge {
+    @apply inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold;
+  }
+  .badge-print {
+    @apply badge bg-print text-ink;
+  }
+  .badge-ink {
+    @apply badge bg-ink text-white;
+  }
+  .badge-mute {
+    @apply badge bg-white text-ink-soft ring-1 ring-line;
+  }
+  .chip {
+    @apply inline-flex items-center rounded-full border border-line bg-white px-3 py-1 text-sm font-medium text-ink-soft transition-colors hover:border-ink hover:text-ink;
+  }
+}
