@@ -1,0 +1,29 @@
+# ============================================================================
+#  IMPOSTAZIONI DI 3D MARKET — compila questo file, poi fai doppio clic su
+#  3-PUBBLICA-SU-NETLIFY (.bat su Windows, .command su Mac).
+#  Incolla i valori dopo il segno "=" senza spazi né virgolette.
+#  NON condividere questo file: contiene chiavi segrete.
+# ============================================================================
+
+# --- SUPABASE (obbligatorie) -------------------------------------------------
+# supabase.com → il tuo progetto → Project Settings → API
+NEXT_PUBLIC_SUPABASE_URL=INCOLLA_QUI_PROJECT_URL
+# chiave "anon public" oppure "publishable" (sb_publishable_…)  ← quella PUBBLICA
+NEXT_PUBLIC_SUPABASE_ANON_KEY=INCOLLA_QUI_ANON_KEY
+# chiave "service_role" oppure "secret" (sb_secret_…)  ← quella SEGRETA
+SUPABASE_SERVICE_ROLE_KEY=INCOLLA_QUI_SERVICE_ROLE_KEY
+
+# --- STRIPE (per i pagamenti; puoi aggiungerle anche dopo) -------------------
+# dashboard.stripe.com → Developers → API keys → Secret key (sk_test_… per le prove)
+STRIPE_SECRET_KEY=INCOLLA_QUI
+# Developers → Webhooks → i due "Signing secret" separati da virgola (whsec_…,whsec_…)
+STRIPE_WEBHOOK_SECRET=INCOLLA_QUI
+
+# --- EMAIL (facoltative, servizio Resend) ------------------------------------
+RESEND_API_KEY=INCOLLA_QUI
+EMAIL_FROM=INCOLLA_QUI
+SUPPORT_EMAIL=INCOLLA_QUI
+
+# --- DOMINIO (facoltativo) ---------------------------------------------------
+# Lascia così finché usi l'indirizzo .netlify.app; con un dominio tuo: https://www.tuodominio.it
+NEXT_PUBLIC_SITE_URL=INCOLLA_QUI

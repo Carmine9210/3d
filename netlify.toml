@@ -1,0 +1,39 @@
+# Netlify — Next.js 15 (App Router, Server Actions, Middleware) tramite OpenNext adapter.
+# Collega il repository da app.netlify.com → "Add new site" → "Import an existing project".
+# Le variabili d'ambiente si impostano in Site configuration → Environment variables (vedi .env.example).
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
+  # Scansione segreti di Netlify: questi valori sono PUBBLICI per definizione (finiscono nel browser),
+  # quindi non devono fermare il build. NON segnare mai queste variabili come "Contains secret values".
+  # Le chiavi segrete (SUPABASE_SERVICE_ROLE_KEY, STRIPE_*, RESEND_API_KEY) restano scansionate.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY,NEXT_PUBLIC_SITE_URL,SUPABASE_URL,SUPABASE_DATABASE_URL,SUPABASE_ANON_KEY,SUPABASE_PUBLISHABLE_KEY"
+  # File con valori di esempio (sk_test_…, whsec_…) che la smart detection potrebbe scambiare per segreti.
+  SECRETS_SCAN_OMIT_PATHS = "docs/,documentazione/,tests/,scripts/,.github/,.env.example,README.md,DECISIONS.md,impostazioni.env,2-IMPOSTAZIONI.txt,LEGGIMI.txt"
+
+# Adattatore ufficiale Next.js (Netlify lo installa da solo; dichiararlo fissa il comportamento).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Funzioni Netlify (pulizia schedulata in netlify/functions/)
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+# `netlify dev` in locale: avvia Next su :3000 e lo espone su :8888 con le funzioni Netlify
+[dev]
+  command = "npm run dev"
+  targetPort = 3000
+  port = 8888
+  framework = "#custom"
+
+# Il webhook Stripe non deve mai finire in cache
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Cache-Control = "no-store"

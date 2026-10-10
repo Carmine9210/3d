@@ -1,0 +1,118 @@
+=====================================================================
+  3D MARKET — METTERLO ONLINE IN 3 PASSI
+=====================================================================
+
+Cosa c'è in questa cartella:
+
+  LEGGIMI.txt                     queste istruzioni
+  1-DATABASE-SUPABASE.sql         il database completo (passo 1)
+  2-IMPOSTAZIONI.txt              le tue chiavi (passo 2)
+  3-PUBBLICA-SU-NETLIFY.bat       pubblica il sito - Windows (passo 3)
+  3-PUBBLICA-SU-NETLIFY.command   pubblica il sito - Mac (passo 3)
+  sito\                           il codice del sito: NON serve aprirlo
+
+IMPORTANTE: non trascinare la cartella o lo zip su "Netlify Drop".
+Quel metodo pubblica solo pagine statiche: il sito ha login, pagamenti
+e funzioni server, quindi va pubblicato con il passo 3.
+
+Ti servono (gratuiti): un account Supabase, un account Netlify,
+un account Stripe (per i pagamenti) e Node.js sul computer.
+
+
+---------------------------------------------------------------------
+ PASSO 1 — Database (Supabase) · 5 minuti · una volta sola
+---------------------------------------------------------------------
+ 1. Vai su https://supabase.com → New project. Regione consigliata:
+    Europe (Frankfurt). Annota la password del database.
+ 2. Nel progetto: SQL Editor → New query.
+ 3. Apri 1-DATABASE-SUPABASE.sql con il Blocco note (Windows) o
+    TextEdit (Mac), seleziona tutto, copia, incolla nell'editor → Run.
+    Deve comparire "Success. No rows returned".
+ 4. Project Settings → API: tieni aperta questa pagina per il passo 2.
+
+
+---------------------------------------------------------------------
+ PASSO 2 — Impostazioni · 3 minuti
+---------------------------------------------------------------------
+ Apri 2-IMPOSTAZIONI.txt e sostituisci i testi INCOLLA_QUI:
+
+   NEXT_PUBLIC_SUPABASE_URL       → "Project URL"
+   NEXT_PUBLIC_SUPABASE_ANON_KEY  → chiave "anon public"/"publishable"
+                                     (quella PUBBLICA)
+   SUPABASE_SERVICE_ROLE_KEY      → chiave "service_role"/"secret"
+                                     (quella SEGRETA)
+
+ Stripe ed email puoi lasciarli come sono per ora e aggiungerli dopo.
+ Salva il file. Non condividerlo con nessuno: contiene chiavi segrete.
+
+
+---------------------------------------------------------------------
+ PASSO 3 — Pubblica su Netlify · 5-10 minuti
+---------------------------------------------------------------------
+ 1. Installa Node.js (versione LTS) da https://nodejs.org/it/download
+    se non ce l'hai (il programma te lo segnala e apre la pagina).
+ 2. Doppio clic su:
+      Windows → 3-PUBBLICA-SU-NETLIFY.bat
+                (se Windows avvisa: "Ulteriori informazioni" → "Esegui comunque")
+      Mac     → 3-PUBBLICA-SU-NETLIFY.command
+                (la prima volta: tasto destro → Apri → Apri)
+ 3. Segui la finestra:
+      - si apre il browser: accedi a Netlify e premi "Authorize";
+      - scegli il tuo team e un nome per il sito (es. 3d-market-mario);
+      - attendi la pubblicazione (la prima volta 5-10 minuti).
+ 4. Alla fine vedi l'indirizzo del sito, tipo https://3d-market-mario.netlify.app
+
+ Per aggiornare il sito (nuove chiavi, Stripe, modifiche) basta rifare
+ doppio clic sullo stesso file: aggiorna lo stesso sito.
+
+
+---------------------------------------------------------------------
+ DOPO LA PUBBLICAZIONE (una volta sola)
+---------------------------------------------------------------------
+ A. Supabase → Authentication → URL Configuration
+      Site URL:       https://<nome>.netlify.app
+      Redirect URLs:  https://<nome>.netlify.app/**
+ B. Controllo: apri https://<nome>.netlify.app/api/health
+      deve comparire  "ok":true,"db":"ok"
+ C. Diventa amministratore: registrati sul sito, poi in Supabase →
+    SQL Editor esegui (con la tua email):
+      update public.profiles set role = 'admin'
+      where user_id = (select id from auth.users where email = 'tua@email.it');
+ D. Pagamenti (quando sei pronto):
+      Stripe → Developers → API keys → copia la Secret key in
+      STRIPE_SECRET_KEY (2-IMPOSTAZIONI.txt).
+      Stripe → Developers → Webhooks → crea DUE endpoint verso
+      https://<nome>.netlify.app/api/stripe/webhook
+        1) "Your account": checkout.session.completed,
+           checkout.session.async_payment_succeeded, charge.refunded,
+           charge.dispute.created, charge.dispute.closed
+        2) "Connected accounts": account.updated
+      Copia i due "Signing secret" in STRIPE_WEBHOOK_SECRET separati
+      da una virgola, poi rifai doppio clic su 3-PUBBLICA-SU-NETLIFY.
+      Prova con la carta 4242 4242 4242 4242.
+
+
+---------------------------------------------------------------------
+ SE QUALCOSA VA STORTO
+---------------------------------------------------------------------
+ "Apri 2-IMPOSTAZIONI.txt e compila ..."
+     → manca una chiave obbligatoria: compilala e riprova.
+ "PERICOLO: ... chiave SEGRETA"
+     → hai invertito le due chiavi Supabase: la anon/publishable va in
+       NEXT_PUBLIC_SUPABASE_ANON_KEY, la service_role/secret nell'altra.
+ "Creazione del sito non riuscita"
+     → il nome è già usato da qualcun altro: riprova con un altro nome.
+ "Secrets scanning found secrets"
+     → in Netlify (Site configuration → Environment variables) togli
+       "Contains secret values" dalle variabili NEXT_PUBLIC_*.
+ /api/health dice "db":"error"
+     → il progetto Supabase è in pausa (riattivalo) o URL/chiave errati.
+ Dopo la conferma email: "link non valido"
+     → manca il punto A qui sopra.
+ Ordini fermi su "In attesa di pagamento"
+     → webhook Stripe non configurato o secret sbagliato (punto D).
+
+ Guida tecnica completa: sito\documentazione\DEPLOY.md
+ In alternativa al passo 3 puoi caricare il contenuto di "sito" su
+ GitHub e importarlo da Netlify: sito\documentazione\NETLIFY-LEGGIMI.md
+=====================================================================
